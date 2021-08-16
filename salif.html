@@ -1,0 +1,95 @@
+<html lang="en">
+
+<head>
+    <title>Salif</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+</head>
+<body>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <p id="selfPeerID">Self Peer ID(Salif):</p>
+            <p class="text-primary" id="connectionStatus">Connection Status:</p>
+            <input id="PartnerPeerID" type="text" placeholder="Partner Peer ID" class="form-control"><br/>
+            <button id="connectBtn" class="btn btn-primary">Connect</button><br/>
+        </div>
+    </div>
+</div>
+
+<div class="container text-center">
+    <div class="row">
+        <div class="col-md-6 p-2">
+            <video class="w-100" id="ShorifPreview"></video>
+            <h6>Shorif's Preview</h6>
+
+        </div>
+        <div class="col-md-6 p-2">
+            <video class="w-100" id="salifPreview"></video>
+            <h6>Salif's Preview</h6>
+            <button id="receiveCall" class="btn btn-primary">Receive Call</button>
+        </div>
+    </div>
+</div>
+
+
+
+<script src="js/jquery-3.6.0.min.js"></script>
+<script src="js/peerjs.min.js"></script>
+<script src="js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+    let peer=new Peer();
+    peer.on('open',function (PeerID) {
+        $('#selfPeerID').html("Self Peer ID(Salif): "+PeerID)
+    })
+
+
+    $('#connectBtn').on('click',function () {
+        let PartnerPeerID= $('#PartnerPeerID').val();
+        let conn=peer.connect(PartnerPeerID);
+        conn.on('open',function () {
+            $('#connectionStatus').html("Connection Status: YES");
+
+        })
+    })
+
+
+
+    let mediaConstraints={'video':true,'audio':true}
+    $('#receiveCall').on('click',function () {
+        peer.on('call',function (call) {
+
+            navigator.mediaDevices.getUserMedia(mediaConstraints)
+            .then(function (stream) {
+
+                // Salif Preview
+                let salifPreview= document.getElementById('salifPreview')
+                salifPreview.srcObject=stream;
+                salifPreview.play();
+                call.answer(stream);
+
+
+                call.on('stream',function (remoteStream) {
+                    // Shorif Preview
+                    let ShorifPreview= document.getElementById('ShorifPreview')
+                    ShorifPreview.srcObject=remoteStream;
+                    ShorifPreview.play();
+                })
+
+            })
+            .catch(function (err) {
+                alert(err)
+            })
+
+
+        })
+    })
+
+
+
+</script>
+</body>
+</html>
